@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Script Generator</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: white;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-top: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: fadeIn 2s ease-in-out;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .container:hover {
+            transform: scale(1.02);
+        }
+
+        label {
+            display: block;
+            margin: 15px 0 5px;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 5px #00ffff;
+        }
+
+        input, textarea, button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease-in-out;
+        }
+
+        input:focus, textarea:focus {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        button {
+            background: linear-gradient(135deg, #00ffff, #00bfff);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            transition: all 0.3s ease-in-out;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #00bfff, #00ffff);
+            transform: scale(1.05);
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            transition: all 0.3s ease-in-out;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            text-align: justify;
+            color: #00ffff;
+            font-family: 'Courier New', monospace;
+            line-height: 1.5;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Background Animation */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 255, 255, 0.1) 10%, transparent 10.01%);
+            background-size: 50px 50px;
+            animation: moveBackground 10s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes moveBackground {
+            from {
+                transform: translate(0, 0);
+            }
+            to {
+                transform: translate(-50%, -50%);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Video Script Generator</h1>
+
+        <!-- Step 1: Enter YouTube Link -->
+        <form id="videoForm">
+            <label for="video_link">Enter YouTube Video Link:</label>
+            <input type="text" id="video_link" name="video_link" placeholder="Paste YouTube link here..." required>
+            <button type="submit">Analyze Transcript</button>
+        </form>
+
+        <!-- Step 2: Enter Topic -->
+        <form id="topicForm" style="display: none;">
+            <label for="topic">Enter Topic for New Script:</label>
+            <textarea id="topic" name="topic" rows="4" placeholder="Describe the topic for your script..."></textarea>
+            <button type="submit">Generate Script</button>
+        </form>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        document.getElementById('videoForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const videoLink = document.getElementById('video_link').value;
+
+            const response = await fetch('/analyze_transcript', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    'video_link': videoLink
+                })
+            });
+
+            const data = await response.json();
+            const resultDiv = document.getElementById('result');
+
+            if (response.ok) {
+                resultDiv.innerHTML = `<p>Transcript analyzed successfully! Now enter your topic below.</p>`;
+                document.getElementById('topicForm').style.display = 'block';
+            } else {
+                resultDiv.innerHTML = `<p style="color: red;">${data.error}</p>`;
+            }
+        });
+
+        document.getElementById('topicForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const topic = document.getElementById('topic').value;
+
+            const response = await fetch('/generate_script', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    'topic': topic
+                })
+            });
+
+            const data = await response.json();
+            const resultDiv = document.getElementById('result');
+
+            if (response.ok) {
+                resultDiv.innerHTML = `<h2>Generated Video Script:</h2><pre>${data.script}</pre>`;
+            } else {
+                resultDiv.innerHTML = `<p style="color: red;">${data.error}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
