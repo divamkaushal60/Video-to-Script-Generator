@@ -1,0 +1,15 @@
+{
+  "name": "youtube-script-analyzer",
+  "version": "1.0.0",
+  "description": "YouTube transcript analyzer and script generator",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.6.0",
+    "youtube-transcript": "^1.0.6"
+  }
+}
