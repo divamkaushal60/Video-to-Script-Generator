@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, url_for
 from youtube_transcript_api import YouTubeTranscriptApi
 import requests
 import re
 import json
+import os
 
 app = Flask(__name__)
 
@@ -160,6 +161,10 @@ def extract_video_id(video_link):
 
 @app.route('/')
 def index():
+    return render_template('landing.html')
+
+@app.route('/app')
+def app_page():
     return render_template('index.html')
 
 @app.route('/analyze_transcript', methods=['POST'])
@@ -172,7 +177,7 @@ def analyze_transcript():
     
     transcript = get_youtube_transcript(video_id)
     if not transcript:
-        return jsonify({"error": "Failed to fetch the transcript."}), 400
+        return jsonify({"error": "Failed to fetch the transcript. Please make sure the video has captions available."}), 400
     
     analysis_result = analyze_with_groq(transcript)
     if not analysis_result:
